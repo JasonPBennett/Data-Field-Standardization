@@ -15,7 +15,7 @@ def load_english_dictionary(file_path):
     with open(file_path, 'r') as file:
         return {line.strip().lower() for line in file}
 
-# Load the English dictionary (https://github.com/dwyl/english-words/blob/master/words.txt)
+# Load the English dictionary
 english_dict_file_path = './data_location/data/words.txt'
 english_words = load_english_dictionary(english_dict_file_path)
 
@@ -24,64 +24,41 @@ def to_ascii_and_strip(text):
     text_ascii = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
     return text_ascii.strip()
 
-# Download required NLTK data and initialize the lemmatizer
+# Initialize the lemmatizer
 nltk.download('wordnet', quiet=True)
 lemmatizer = WordNetLemmatizer()
 
-# Apply rules for each word - includes reducing words to their roots (lemmatization)
-#  (https://www.educative.io/answers/difference-between-tokenization-and-lemmatization-in-nlp)
-def preprocess_word(word):
-    # Lowercase the word
-    word = word.lower()
-    # Expand contractions
-    word = contractions.fix(word)
-    # Remove special characters (keeping only alphanumeric and spaces)
-    word = re.sub(r'[^a-zA-Z0-9\s]', '', word)
-    # Remove punctuation at the ends of the word
-    word = word.strip(string.punctuation)
-    # Split hyphenated words and handle slashes
-    words = re.split('-|/', word)
-    # Process each word in the split
-    processed_words = []
-    for w in words:
-        # Lemmatize the words
-        w = lemmatizer.lemmatize(w)
-        # Append processed word to the list
-        processed_words.append(w)
-    return processed_words
+# Function to preprocess and check for typos
+def preprocess_and_check_typos(text, dictionary, is_strict):
+    # Convert to lowercase, fix contractions, remove special characters
+    text = text.lower()
+    text = contractions.fix(text)
+    text = re.sub(r'[^a-zA-Z0-9\s-]', '', text)
+    text = text.strip(string.punctuation)
 
-# Function to check for typos against the English dictionary
-def check_typos(text, dictionary):
-    tokens = text.split()
-    processed_tokens = [preprocess_word(token) for token in tokens]
-    flattened_tokens = [item for sublist in processed_tokens for item in sublist]
-    corrected_tokens = []
-    for token in flattened_tokens:
-        if token.lower() not in dictionary:
-            corrected_token = '[typo]'
+    # Check for specific valid patterns first
+    pattern = re.compile(r'\b(?:additional file) \d+\b', re.IGNORECASE)
+    if pattern.search(text):
+        return text  # Return as is if it matches the pattern
+
+    # Split and process the rest of the text
+    words = re.split('\s+|[-/]', text)  # Split on spaces, hyphens, and slashes
+    processed_words = []
+    for word in words:
+        word = lemmatizer.lemmatize(word)  # Lemmatize the word
+        if not is_strict and (word.lower() in dictionary or re.match(r'^\d+$', word)):
+            processed_words.append(word)  # Keep numbers and dictionary words
+        elif is_strict and word.lower() in dictionary:
+            processed_words.append(word)  # Strict check: only keep dictionary words
         else:
-            corrected_token = token
-        corrected_tokens.append(corrected_token)
-    return ' '.join(corrected_tokens)
+            processed_words.append('[typo]')  # Mark as typo
+    return ' '.join(processed_words)
 
 # Apply the functions
 data['location'] = data['location'].astype(str).apply(to_ascii_and_strip)
-data['corrected_location'] = data['location'].apply(lambda x: check_typos(x, english_words))
+data['corrected_location_strict'] = data['location'].apply(lambda x: preprocess_and_check_typos(x, english_words, True))
+data['corrected_location_numeric_allowed'] = data['location'].apply(lambda x: preprocess_and_check_typos(x, english_words, False))
 
-# Counting the non-unique rows after typo correction
-non_unique_counts = data['corrected_location'].value_counts()
-non_unique_rows = non_unique_counts[non_unique_counts > 1]
-
-# Results
-non_unique_rows_count = len(non_unique_rows)
-non_unique_rows_occurrences = non_unique_rows.sum()
-
-# Displaying the final output
-print(f"Number of non-unique rows: {non_unique_rows_count}")
-print(f"Total occurrences of non-unique rows: {non_unique_rows_occurrences}")
-print("Top non-unique rows:")
-print(non_unique_rows.head())
-
-# Exporting the corrected data to a CSV file
-output_file = './data_location/outputs/ascii_typo.csv'
+# Exporting the data to a CSV file
+output_file = './data_location/outputs/ascii_typo_comparison.csv'
 data.to_csv(output_file, index=False)
