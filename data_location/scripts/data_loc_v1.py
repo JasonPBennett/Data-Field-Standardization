@@ -36,7 +36,7 @@ def preprocess_and_check_typos(text, dictionary, is_strict):
     text = re.sub(r'[^a-zA-Z0-9\s-]', '', text)
     text = text.strip(string.punctuation)
 
-    # Check for specific valid patterns first
+    # Check for specific valid patterns first - maybe expand this?
     pattern = re.compile(r'\b(?:additional file) \d+\b', re.IGNORECASE)
     if pattern.search(text):
         return text  # Return as is if it matches the pattern

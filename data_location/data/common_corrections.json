@@ -1,0 +1,28 @@
+{
+    "locations": [
+        {
+            "location": "table",
+            "corrections": ["tabel", "tabe", "tabl", "tbl"]
+        },
+        {
+            "location": "figure",
+            "corrections": ["figur", "figgure", "fig", "fig.", "figs"]
+        },
+        {
+            "location": "data",
+            "corrections": ["datta", "dat", "dta"]
+        },
+        {
+            "location": "title",
+            "corrections": ["titel", "tittle", "titl"]
+        },
+        {
+            "location": "abstract",
+            "corrections": ["abstrakt", "abstrct", "abst", "abs"]
+        },
+        {
+            "location": "supplementary",
+            "corrections": ["supplimentary", "supplimentry", "supplem", "supp"]
+        }
+    ]
+}
