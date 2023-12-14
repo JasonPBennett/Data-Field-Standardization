@@ -18,7 +18,11 @@
         },
         {
             "location": "abstract",
-            "corrections": ["abstrakt", "abstrct", "abst", "abs"]
+            "corrections": ["abstarct", "absract", "abst", "abs"]
+        },
+        {
+            "location": "reference",
+            "corrections": ["refence", "referce", "referece", "referecne", "referenc"]
         },
         {
             "location": "supplementary",
