@@ -12,8 +12,7 @@ def conforms_to_pattern(text, id_type):
     # Check for link to HLA Ligand Atlas (almost 90% of all locations)
     elif id_type == "WEB" and bool(re.match(r'^https://hla-ligand-atlas.org/peptide/', text)):
         return True
-    else:
-        return False
+    return False
 
 def combine_rows(loc_df):
     """
@@ -84,6 +83,25 @@ def standardize_location(location):
 
     return location
 
+# Convert location to standardized format ex. "Figure S1" -> "supplemental figure 1"
+def transform_supplemental_locations(text):
+    # Define keywords
+    keywords = ["figure", "data", "table"]
+
+    # Check if text is a string and not NaN
+    if pd.notna(text):
+        # Split the text and check if it matches the pattern
+        parts = text.lower().split()
+        # Check for pattern: keyword followed by 's' and number (e.g., "table s2")
+        if len(parts) == 2 and parts[0] in keywords and re.match(r's\d+', parts[1]):
+            number = parts[1][1:]  # Extract the number
+            return f"supplemental {parts[0]} {number}"
+        # Check for reversed pattern: 's' and number followed by keyword (e.g., "s2 data")
+        elif len(parts) == 2 and re.match(r's\d+', parts[0]) and parts[1] in keywords:
+            number = parts[0][1:]  # Extract the number
+            return f"supplemental {parts[1]} {number}"
+    return text
+
 if __name__ == "__main__":
     # Data and spellcheck file paths
     file_path = './data_location/data/location_and_counts.csv'
@@ -109,6 +127,12 @@ if __name__ == "__main__":
     processed_locations_df = combine_rows(processed_locations_df)
     print(processed_locations_df.head())
     print(f'Number of locations (corrected & combined): {len(processed_locations_df)}\n')
+    
+    # Transform supplemental locations
+    processed_locations_df['location'] = processed_locations_df['location'].apply(transform_supplemental_locations)
+    processed_locations_df = combine_rows(processed_locations_df)
+    print(processed_locations_df.head())
+    print(f'Number of locations (corrected & combined & transformed): {len(processed_locations_df)}\n')
     
     # Output to csv for quick checking
     processed_locations_df.to_csv('~/Desktop/processed_locations_spellcheck_v3.csv', index=False)
