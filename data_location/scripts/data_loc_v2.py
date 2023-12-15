@@ -6,8 +6,10 @@ import re
 # Function to check if a string matches a given pattern based on specific id
 # type - only counts (change this to labeling function later)
 def conforms_to_pattern(text, id_type):
+    # Check for PDB ID
     if id_type == "PDB" and bool(re.match(r'pdb [A-Za-z0-9]{4}$', text)):
         return True
+    # Check for link to HLA Ligand Atlas (almost 90% of all locations)
     elif id_type == "WEB" and bool(re.match(r'^https://hla-ligand-atlas.org/peptide/', text)):
         return True
     else:
@@ -89,6 +91,7 @@ if __name__ == "__main__":
     locations_df = pd.read_csv(file_path)
     with open(spellcheck_file, 'r') as file:
         location_dict = json.load(file)
+    print(locations_df.head())
     
     # Process location data and standardize location names
     processed_locations_df = combine_rows(locations_df)
@@ -108,7 +111,7 @@ if __name__ == "__main__":
     print(f'Number of locations (corrected & combined): {len(processed_locations_df)}\n')
     
     # Output to csv for quick checking
-    #processed_locations_df.to_csv('~/Desktop/processed_locations_spellcheck.csv', index=False)
+    processed_locations_df.to_csv('~/Desktop/processed_locations_spellcheck_v3.csv', index=False)
     
     # Find number of locations that match each pattern and type
     print(processed_locations_df['location'].apply(lambda x: conforms_to_pattern(x, 'WEB')).value_counts()) # 221,254

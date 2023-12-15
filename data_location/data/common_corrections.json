@@ -1,32 +1,44 @@
 {
-    "locations": [
-        {
-            "location": "table",
-            "corrections": ["tabel", "tabe", "tabl", "tbl"]
-        },
-        {
-            "location": "figure",
-            "corrections": ["figur", "figgure", "fig", "fig.", "figs"]
-        },
-        {
-            "location": "data",
-            "corrections": ["datta", "dat", "dta"]
-        },
-        {
-            "location": "title",
-            "corrections": ["titel", "tittle", "titl"]
-        },
-        {
-            "location": "abstract",
-            "corrections": ["abstarct", "absract", "abst", "abs"]
-        },
-        {
-            "location": "reference",
-            "corrections": ["refence", "referce", "referece", "referecne", "referenc"]
-        },
-        {
-            "location": "supplementary",
-            "corrections": ["supplimentary", "supplimentry", "supplem", "supp"]
-        }
+    "table": [
+        "tabel",
+        "tabe",
+        "tabl",
+        "tbl"
+    ],
+    "figure": [
+        "figur",
+        "figgure",
+        "fig",
+        "fig.",
+        "figs"
+    ],
+    "data": [
+        "datta",
+        "dat",
+        "dta"
+    ],
+    "title": [
+        "titel",
+        "tittle",
+        "titl"
+    ],
+    "abstract": [
+        "abstarct",
+        "absract",
+        "abst",
+        "abs"
+    ],
+    "reference": [
+        "refence",
+        "referce",
+        "referece",
+        "referecne",
+        "referenc"
+    ],
+    "supplementary": [
+        "supplimentary",
+        "supplimentry",
+        "supplem",
+        "supp"
     ]
 }
