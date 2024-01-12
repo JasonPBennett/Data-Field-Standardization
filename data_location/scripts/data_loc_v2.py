@@ -109,34 +109,22 @@ if __name__ == "__main__":
     locations_df = pd.read_csv(file_path)
     with open(spellcheck_file, 'r') as file:
         location_dict = json.load(file)
-    print(locations_df.head())
+    
+    # Looks for any repeated data location field values and sums their counts
+    processed_locations_df = combine_rows(locations_df)
     
     # Process location data and standardize location names
-    processed_locations_df = combine_rows(locations_df)
-    print(processed_locations_df.head())
-    processed_locations_df['location'] = processed_locations_df['location'].apply(standardize_location)
-    print(f'Number of locations (uncorrected & uncombined): {len(processed_locations_df)}\n')
-    
-    # Combine locations with identical names
-    processed_locations_df = combine_rows(processed_locations_df)
-    print(processed_locations_df.head())
-    print(f'Number of locations (uncorrected & combined): {len(processed_locations_df)}\n')
+    processed_locations_df['standardized_location'] = processed_locations_df['location'].apply(standardize_location)
     
     # Perform spellcheck on location names
-    processed_locations_df['location'] = processed_locations_df['location'].apply(location_spellcheck, args=(location_dict,))
-    processed_locations_df = combine_rows(processed_locations_df)
-    print(processed_locations_df.head())
-    print(f'Number of locations (corrected & combined): {len(processed_locations_df)}\n')
+    processed_locations_df['spellchecked_location'] = processed_locations_df['standardized_location'].apply(location_spellcheck, args=(location_dict,))
     
     # Transform supplemental locations
-    processed_locations_df['location'] = processed_locations_df['location'].apply(transform_supplemental_locations)
-    processed_locations_df = combine_rows(processed_locations_df)
-    print(processed_locations_df.head())
-    print(f'Number of locations (corrected & combined & transformed): {len(processed_locations_df)}\n')
+    processed_locations_df['transformed_supplemental_location'] = processed_locations_df['spellchecked_location'].apply(transform_supplemental_locations)
     
     # Output to csv for quick checking
-    processed_locations_df.to_csv('~/Desktop/processed_locations_spellcheck_v3.csv', index=False)
+    processed_locations_df.to_csv('~/Desktop/processed_locations_all_changes.csv', index=False)
     
     # Find number of locations that match each pattern and type
-    print(processed_locations_df['location'].apply(lambda x: conforms_to_pattern(x, 'WEB')).value_counts()) # 221,254
-    print(processed_locations_df['location'].apply(lambda x: conforms_to_pattern(x, 'PDB')).value_counts()) # 1,705
+    print(f"Number of locations that are web addresses: {sum(processed_locations_df['location'].apply(lambda x: conforms_to_pattern(x, 'WEB')))}") # 221,254
+    print(f"Number of locations that are PDB IDs: {sum(processed_locations_df['location'].apply(lambda x: conforms_to_pattern(x, 'PDB')))}") # 1,705
